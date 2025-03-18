@@ -45,6 +45,7 @@ namespace WebApi.Controllers
             return CreatedAtAction(nameof(GetProductCategoryById),new {id = productCategory.Id},productCategory);
         }
 
+        //Delete Product_Category
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProductCategory(int id)
         {
@@ -57,5 +58,20 @@ namespace WebApi.Controllers
             await dbContext.SaveChangesAsync();
             return Ok("Product Category Deleted Successfully");
         }
+        
+        //Update Product Category
+        [HttpPut]
+        public async Task<IActionResult> UpdateProductCategory(int id,[FromBody] ProductCategory productCategory){
+            var existingCategory = await dbContext.ProductCategories.FirstOrDefaultAsync(x=> x.Id == id);
+            if(existingCategory == null)
+            {
+                return NotFound("Product Category not Found.");
+            }
+            existingCategory.Name = productCategory.Name;
+            
+            dbContext.ProductCategories.Update(existingCategory);
+            await dbContext.SaveChangesAsync();
+            return Ok(existingCategory);
+        }   
     }
 }
