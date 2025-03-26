@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Data;
 using WebApi.Entity;
+using WebApi.Repository.Interface;
 using WebApi.ViewModels;
 
 namespace WebApi.Controllers
@@ -13,30 +14,30 @@ namespace WebApi.Controllers
     public class ProductController : ControllerBase
     {
         private readonly FirstRunDbContext dbContext;
-        public ProductController(FirstRunDbContext dbContext)
+        private readonly IProductRepository productRepository;
+        public ProductController(FirstRunDbContext dbContext,IProductRepository productRepository)
         {
             this.dbContext = dbContext;
+            this.productRepository = productRepository;
         }
+
         //get the products
         [HttpGet]
-        public async Task<IActionResult> GetAllProduct(){
-            var products = await dbContext.Products.Include(x=>x.Category).ToListAsync();
+        public async Task<IActionResult> GetProducts(){
+            var products = await productRepository.GetProducts();
             return Ok(products);
         }
         //get single products
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(int Id){
-            var products = await dbContext.Products.Include(x=>x.Category).Where(x=> x.Id == Id).ToListAsync();
+            var products = await productRepository.GetProductById(Id);
             return Ok(products);
         }
         //get the products by name
         [HttpGet("search/{name}")]
         public async Task<IActionResult> GetProductByName (string name)
         {
-            var products = await dbContext.Products
-                .Include(x=>x.Category)
-                .Where(x => x.Name.ToLower().Contains(name.ToLower()))
-                .ToListAsync();
+            var products = await productRepository.SearchProduct(name);
 
             if (!products.Any()){
                 return NotFound("No products found");
