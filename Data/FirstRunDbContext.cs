@@ -11,4 +11,5 @@ public class FirstRunDbContext : DbContext
     }
     public DbSet<Entity.Product> Products {get; set;}
     public DbSet<Entity.ProductCategory> ProductCategories { get; set;}
+    public DbSet<Entity.User> Users{ get; set; }
 }
