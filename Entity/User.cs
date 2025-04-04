@@ -22,6 +22,8 @@ public class User
     [StringLength(200)]
     public string? Address { get; set;}
 
+    public int Age { get; set;}
+
     [Phone]
     [StringLength(15)]
     public string Phone { get; set;}

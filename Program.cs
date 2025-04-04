@@ -5,6 +5,7 @@ using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using WebApi.Services.Interfaces;
 using WebApi.Services;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,13 +28,29 @@ builder.Services.AddOpenApi();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/api/auth/login"; 
-        options.LogoutPath = "/api/auth/logout";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+        options.LoginPath = "/api/auth/login";//Redirect path for login  
+        options.LogoutPath = "/api/auth/logout"; // Redirect path for Logout
+        options.AccessDeniedPath = "/api/auth/forbidden"; // Redirect when access is denied
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(20); //Cookie expiration in 20 min
         options.SlidingExpiration = true;
-        options.AccessDeniedPath = "/Forbidden/";
     });
 builder.Services.AddHttpContextAccessor();
+
+//Add Authorization Services and Define Policy
+builder.Services.AddAuthorization(options=> 
+{
+    options.AddPolicy("AgeMustBe18+", policy=>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireAssertion(context =>
+        {
+            var ageClaim = context.User.FindFirst("Age");
+            if(ageClaim == null){return false;}
+            return int.TryParse(ageClaim.Value, out var age) && age >=18;
+        });
+    });
+});
+
 var app = builder.Build();
 
 

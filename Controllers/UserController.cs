@@ -1,3 +1,4 @@
+using HotChocolate.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -63,6 +64,14 @@ namespace WebApi.Controllers
                 return Unauthorized(new {error = e.Message});
             }
         }
+
+        [Authorize(Policy = "AgeMustBe18+")]
+        [HttpGet("restriced_Conetent")]
+        public IActionResult RestrictedContent(){
+            return Ok("only users 18 and older can see this");
+        }
+        
+
         [HttpGet]
         public async Task<IActionResult> Logout()
             {
